@@ -1,51 +1,54 @@
+import React, { useState } from "react";
 
-import React, { useState, useEffect } from "react";
-import axios from "axios";
-import ReactQuill from "react-quill";
-import "react-quill/dist/quill.snow.css";
-
-const Editor = () => {
-  const [htmlContent, setHtmlContent] = useState("");
-  const [formData, setFormData] = useState({ title: "", content: "", image: "" });
-
-  useEffect(() => {
-    axios.get("http://localhost:5000/getEmailLayout").then((response) => {
-      setHtmlContent(response.data.html);
-    });
-  }, []);
-
-  const handleTextChange = (field, value) => {
-    setFormData({ ...formData, [field]: value });
-  };
+const Editor = ({ imageURL }) => {
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
 
   const handleSave = () => {
-    axios.post("http://localhost:5000/uploadEmailConfig", formData)
-      .then(() => alert("Template saved successfully!"))
-      .catch((err) => console.error("Error saving template:", err));
+    const templateData = {
+      title,
+      content,
+      image: imageURL,
+    };
+
+    // Logs template data or sends to backend
+    console.log("Template Data:", templateData);
+    alert("Template data saved successfully!");
+    // Optionally send to backend with Axios
+    // axios.post("http://localhost:5000/saveTemplate", templateData);
   };
 
   return (
     <div>
-      <h1>Edit Email Template</h1>
-      <div>
+      <div style={{ marginBottom: "10px" }}>
         <label>Title:</label>
         <input
           type="text"
-          value={formData.title}
-          onChange={(e) => handleTextChange("title", e.target.value)}
+          value={title}
+          onChange={(e) => setTitle(e.target.value)}
+          style={{ marginLeft: "10px", padding: "5px" }}
         />
       </div>
-      <div>
+      <div style={{ marginBottom: "10px" }}>
         <label>Content:</label>
-        <ReactQuill
-          value={formData.content}
-          onChange={(value) => handleTextChange("content", value)}
-        />
+        <textarea
+          rows="4"
+          value={content}
+          onChange={(e) => setContent(e.target.value)}
+          style={{ marginLeft: "10px", width: "300px", padding: "5px" }}
+        ></textarea>
       </div>
-      <button onClick={handleSave}>Save Template</button>
+      <div style={{ marginTop: "20px", padding: "10px", border: "1px solid #ccc" }}>
+        <h3>Preview:</h3>
+        <h1>{title}</h1>
+        <p>{content}</p>
+        {imageURL && <img src={imageURL} alt="Uploaded" style={{ maxWidth: "300px" }} />}
+      </div>
+      <button onClick={handleSave} style={{ marginTop: "10px", padding: "10px" }}>
+        Save Template
+      </button>
     </div>
   );
 };
 
 export default Editor;
-    
