@@ -1,47 +1,32 @@
-
 const express = require("express");
 const multer = require("multer");
-const bodyParser = require("body-parser");
 const cors = require("cors");
-const fs = require("fs");
 const path = require("path");
 
 const app = express();
 app.use(cors());
-app.use(bodyParser.json());
+app.use(express.json());
 
-// Get Email Layout
-app.get("/getEmailLayout", (req, res) => {
-  const filePath = path.join(__dirname, "templates", "layout.html");
-  fs.readFile(filePath, "utf-8", (err, data) => {
-    if (err) {
-      return res.status(500).send("Error reading layout file.");
-    }
-    res.json({ html: data });
-  });
-});
-
-// Upload Image
+// Multer setup for file uploads
 const upload = multer({ dest: "uploads/" });
+
+// Endpoint to upload images
 app.post("/uploadImage", upload.single("image"), (req, res) => {
-  const imageUrl = `http://localhost:5000/uploads/${req.file.filename}`;
+  const file = req.file;
+  const imageUrl = `http://localhost:5000/uploads/${file.filename}`;
   res.json({ imageUrl });
 });
 
-// Save Email Config
-app.post("/uploadEmailConfig", (req, res) => {
-  const config = req.body;
-  fs.writeFile("emailConfig.json", JSON.stringify(config), (err) => {
-    if (err) {
-      return res.status(500).send("Error saving configuration.");
-    }
-    res.send("Configuration saved successfully.");
-  });
-});
-
-// Serve static files (e.g., images)
+// Serve uploaded files statically
 app.use("/uploads", express.static(path.join(__dirname, "uploads")));
 
+// Endpoint to save template data
+app.post("/saveTemplate", (req, res) => {
+  const { title, content, image } = req.body;
+  console.log("Template Data Received:", { title, content, image });
+  res.json({ message: "Template saved successfully!" });
+});
+
+// Start the server
 const PORT = 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
-    
+app.listen(PORT, () => console.log(`Server running on http://localhost:${PORT}`));
